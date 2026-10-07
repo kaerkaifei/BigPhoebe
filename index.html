@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#f3f6fc">
+<meta name="description" content="用11种原形菲比合成升级，挑战排行榜。">
+<title>合成大菲比</title>
+<link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+<link rel="stylesheet" href="site.css">
+<link rel="preload" as="image" href="assets/play-01.4e04c025a9e8.webp" fetchpriority="high">
+<link rel="preload" as="image" href="assets/play-02.555581d7acf0.webp" fetchpriority="high">
+</head>
+<body class="in-lobby">
+<svg class="symbols" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+ <symbol id="i-spark" viewBox="0 0 24 24"><path d="m12 2 2.8 7.2L22 12l-7.2 2.8L12 22l-2.8-7.2L2 12l7.2-2.8Z"/></symbol>
+ <symbol id="i-cup" viewBox="0 0 24 24"><path d="M7 3h10v7a5 5 0 0 1-10 0ZM7 5H3v3a4 4 0 0 0 4 4m10-7h4v3a4 4 0 0 1-4 4m-5 3v5m-4 1h8"/></symbol>
+ <symbol id="i-pause" viewBox="0 0 24 24"><path d="M7 5h3v14H7zM14 5h3v14h-3z"/></symbol>
+ <symbol id="i-reset" viewBox="0 0 24 24"><path d="M4 9a8.5 8.5 0 1 1 .3 7M4 3v6h6"/></symbol>
+ <symbol id="i-top" viewBox="0 0 24 24"><path d="M12 19V5m-7 7 7-7 7 7"/></symbol>
+ <symbol id="i-sound" viewBox="0 0 24 24"><path d="m11 4-5 4H3v8h3l5 4ZM15 8a6 6 0 0 1 0 8M18 5a10 10 0 0 1 0 14"/></symbol>
+ <symbol id="i-muted" viewBox="0 0 24 24"><path d="m11 4-5 4H3v8h3l5 4ZM16 9l5 6M21 9l-5 6"/></symbol>
+ <symbol id="i-close" viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18"/></symbol>
+ <symbol id="i-chevron" viewBox="0 0 24 24"><path d="m9 5 7 7-7 7"/></symbol>
+ <symbol id="i-edit" viewBox="0 0 24 24"><path d="m15 4 5 5M4 20l5-1L21 7a2 2 0 0 0-4-4L5 15ZM4 20h16"/></symbol>
+ <symbol id="i-help" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 1 1 3 2.5c-.5.2-.5 1.2-.5 2M12 17h.01"/></symbol>
+ <symbol id="i-refresh" viewBox="0 0 24 24"><path d="M4 9a8 8 0 0 1 14-3l3 3m0-6v6h-6M20 15a8 8 0 0 1-14 3l-3-3m0 6v-6h6"/></symbol>
+ <symbol id="i-book" viewBox="0 0 24 24"><path d="M12 5c-3-2-7-2-10-1v15c3-1 7-1 10 1 3-2 7-2 10-1V4c-3-1-7-1-10 1Zm0 0v15"/></symbol>
+</svg>
+<div class="shell">
+<header class="header">
+ <h1><span class="brand-mark"><svg><use href="#i-spark"/></svg></span>合成大菲比</h1>
+ <div class="header-tools">
+  <button class="nickname-button" id="name-button"><span id="player-name">漂泊者</span><svg><use href="#i-edit"/></svg></button>
+  <button class="icon-button" id="sound-button" aria-label="关闭音效" aria-pressed="true"><svg><use id="sound-icon" href="#i-sound"/></svg></button>
+  <button class="icon-button" data-open="help" aria-label="玩法"><svg><use href="#i-help"/></svg></button>
+ </div>
+</header>
+<main class="layout">
+ <section class="play-panel" aria-label="合成游戏">
+  <div class="scorebar">
+   <div class="score-cell"><span>得分</span><strong id="score">0</strong></div>
+   <div class="score-cell"><span>最佳</span><strong id="best">0</strong></div>
+   <div class="score-cell level-cell"><span>最高等级</span><strong><small>Lv.</small><span id="highest">1</span></strong></div>
+  </div>
+  <div class="board-wrap" id="board-wrap">
+   <!-- 改版:棋盘可调宽 / 高 —— .board-viewport 是可视窗口,世界尺寸的画布在其中滚动查看 -->
+   <div class="board-viewport" id="board-viewport">
+    <div class="board-canvas-box" id="board-box">
+     <canvas id="game" width="440" height="660" tabindex="0" aria-label="移动瞄准，点击或松手投放。方向键移动，空格投放。">请使用支持 Canvas 的浏览器。</canvas>
+    </div>
+   </div>
+   <!-- 「下一个」贴在可视窗口右上角:棋盘比屏幕宽时也始终可见 -->
+   <div class="next-tag"><span>下一个</span><img id="next-image" alt="下一个菲比"><b id="next-level">1</b></div>
+   <div class="size-tip" id="size-tip" hidden role="status"><span>💡 新增:「棋盘与自动」可调棋盘宽 / 高、页面缩放,并能自动连投</span><button id="size-tip-ok" type="button">知道了</button></div>
+   <div class="loading" id="loading" hidden><svg><use href="#i-spark"/></svg><span id="load-progress">准备中</span></div>
+   <section class="start-screen" id="start-screen" aria-label="开始游戏">
+    <span class="start-eyebrow">PHOEBE · MERGE</span>
+    <h2>小小菲比<br>大大惊喜</h2>
+    <div class="start-art"><span class="orbit orbit-one"></span><span class="orbit orbit-two"></span><img data-image="0" alt="趴趴菲比" width="220" height="162" fetchpriority="high"><span class="start-spark">✦</span></div>
+    <p class="start-caption">碰一碰，把可爱合成下一站。</p>
+    <button id="start-button" class="primary start-button" disabled>开始游戏</button>
+    <div class="start-status"><progress id="start-meter" value="0" max="5" aria-label="前五级加载进度"></progress><span id="start-progress" role="status">先准备 1—5 级</span></div>
+    <details class="start-rules"><summary>怎么玩？</summary><p>移动瞄准，点击或松手投放。<br>相同等级碰在一起，就能合成升级。<br>超过虚线并停稳 1.8 秒，本局结束。</p></details>
+   </section>
+   <div class="asset-wait" id="asset-wait" hidden role="status"><span id="asset-message"></span><button id="asset-retry" hidden>重试</button></div>
+   <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  </div>
+  <div class="board-toolbar">
+   <span class="input-hint"><span class="mouse-hint">点击投放</span><span class="touch-hint">拖动定位 · 松手投放</span></span>
+   <div><button id="pause-button" class="tool-button"><svg><use href="#i-pause"/></svg>暂停</button><button id="restart-button" class="tool-button"><svg><use href="#i-reset"/></svg>重开</button><button class="tool-button mobile-ranks" data-open="rank"><svg><use href="#i-cup"/></svg>榜单</button></div>
+  </div>
+ </section>
+ <aside class="sidebar">
+  <!-- 改版:棋盘宽 / 高 / 页面缩放 + 自动释放(速度可选),原版其余界面保持不动 -->
+  <section class="card toolbox-card" aria-label="棋盘与自动">
+   <div class="card-title"><h2><svg><use href="#i-edit"/></svg>棋盘与自动</h2><span class="mode-pill" id="size-val">440 × 660 · 100%</span></div>
+   <div class="size-rows">
+    <div class="size-row"><span class="size-k">宽</span><button class="size-btn" id="w-minus" type="button" title="宽度 −60(最小 440 = 原版)">−</button><button class="size-btn" id="w-plus" type="button" title="宽度 +60(桌面最大 = 窗口拉满,手机最大 1600)">＋</button></div>
+    <div class="size-row"><span class="size-k">高</span><button class="size-btn" id="h-minus" type="button" title="高度 −100(最小 660 = 原版)">−</button><button class="size-btn" id="h-plus" type="button" title="高度 +100(最大 3000)">＋</button></div>
+    <div class="size-row"><span class="size-k">缩放</span><button class="size-btn" id="zoom-out" type="button" title="整个页面缩小 10%">−</button><button class="size-btn" id="zoom-in" type="button" title="整个页面放大 10%">＋</button></div>
+   </div>
+   <div class="auto-row">
+    <button class="tool-button" id="auto-button" type="button" aria-pressed="false" title="开启后按所选间隔,在棋盘宽度内随机位置自动投放"><svg><use href="#i-reset"/></svg><span>自动释放</span></button>
+    <select id="auto-speed" class="auto-speed" aria-label="自动释放速度" title="自动释放间隔(开启自动释放后,每隔这段时间投一只)">
+     <option value="2000">2 秒</option>
+     <option value="1000" selected>1 秒</option>
+     <option value="600">0.6 秒</option>
+     <option value="400">0.4 秒</option>
+     <option value="1">0.001 秒</option>
+    </select>
+   </div>
+   <div class="auto-row">
+    <button class="tool-button" id="back-top-button" type="button" aria-pressed="false" title="默认关闭:投放后停在当前视野,方便看井底。开启后,每次投放都会把棋盘滚回顶部瞄准区"><svg><use href="#i-top"/></svg><span>投放后回到顶部</span></button>
+   </div>
+   <p class="muted small toolbox-note">宽度 / 高度调整实时生效并记住;棋盘比屏幕大时,滚轮或拖动平移查看;默认停在当前视野,需要自动回顶时打开「投放后回到顶部」。</p>
+  </section>
+  <section class="card ranking-card" aria-label="排行榜">
+   <div class="card-title"><h2><svg><use href="#i-cup"/></svg>排行榜</h2><span class="mode-pill" data-rank-mode>连接中</span></div>
+   <div class="rank-sources tabs" role="tablist" aria-label="排行榜来源"><button data-rank-source="public" role="tab">公共榜</button><button data-rank-source="local" role="tab">本机记录</button></div>
+   <div class="rank-controls"><div class="tabs" role="tablist" aria-label="榜单时段"><button class="active" data-scope="all" role="tab" aria-selected="true">总榜</button><button data-scope="today" role="tab" aria-selected="false">今日</button></div><button class="icon-button refresh-rank" aria-label="刷新排行榜"><svg><use href="#i-refresh"/></svg></button></div>
+   <div class="rank-head"><span>排名 / 昵称</span><span>分数</span></div>
+   <div id="rank-list" class="rank-list"><div class="rank-empty">正在连接公共榜…</div></div>
+   <p class="rank-connection" data-rank-connection></p>
+   <button class="secondary full pending-button" data-retry-pending hidden>重试上传</button>
+   <div class="my-rank" id="my-rank"><span>我的名次</span><strong>—</strong></div>
+   <button class="view-all" data-open="rank">完整榜单<svg><use href="#i-chevron"/></svg></button>
+  </section>
+  <section class="card evolution-card" aria-label="进化图鉴">
+   <div class="card-title"><h2><svg><use href="#i-book"/></svg>进化图鉴</h2><span class="evolution-count"><b id="seen-count">1</b> / 11</span></div>
+   <div class="evolution-grid" id="evolution-grid"></div>
+  </section>
+ </aside>
+</main>
+<footer><button data-open="about">同人作品 · v12 改版</button><span class="origin-credit">原作:<a href="https://mirac.asia/" target="_blank" rel="noopener">合成大菲比 · mirac.asia</a></span><span id="storage-note"></span></footer>
+</div>
+<dialog id="help-dialog" class="modal small-modal">
+ <div class="modal-top"><h2>玩法</h2><button class="icon-button" data-close aria-label="关闭"><svg><use href="#i-close"/></svg></button></div>
+ <div class="help-demo"><img data-image="0" alt="1级菲比"><span>+</span><img data-image="0" alt="1级菲比"><span>→</span><img data-image="1" alt="2级菲比"></div>
+ <div class="help-lines"><p>相同等级接触，合成下一级。</p><p>按角色轮廓碰撞，会旋转、卡位。</p><p>堆过警戒线，停稳 1.8 秒后结束。</p></div>
+ <p class="muted small">方向键移动 · 空格投放 · P 暂停<br>满级两只消除，获得 500 分。</p>
+ <button class="primary full" data-close>知道了</button>
+</dialog>
+<dialog id="pause-dialog" class="modal small-modal">
+ <div class="modal-top"><h2>已暂停</h2><button class="icon-button" data-close aria-label="继续"><svg><use href="#i-close"/></svg></button></div>
+ <button class="primary full" data-close>继续</button><button class="secondary full" id="settle-button">结算上榜</button>
+</dialog>
+<dialog id="restart-dialog" class="modal small-modal">
+ <div class="modal-top"><h2>重新开始？</h2><button class="icon-button" data-close aria-label="取消"><svg><use href="#i-close"/></svg></button></div>
+ <p class="muted">当前成绩不会上榜。</p><button class="primary full" id="confirm-restart">重开</button><button class="secondary full" data-close>继续本局</button>
+</dialog>
+<dialog id="name-dialog" class="modal small-modal">
+ <form id="name-form"><div class="modal-top"><h2>玩家昵称</h2><button class="icon-button" type="button" data-close aria-label="关闭"><svg><use href="#i-close"/></svg></button></div><label class="sr-only" for="name-input">昵称</label><input id="name-input" maxlength="12" placeholder="昵称，1–12 字" autocomplete="nickname" required><p class="muted small">无需登录。公共榜昵称在下次提交成绩时更新。</p><button type="submit" class="primary full">保存</button></form>
+</dialog>
+<dialog id="end-dialog" class="modal small-modal end-modal">
+ <div class="modal-top"><h2 id="end-title">本局结束</h2><svg class="end-cup"><use href="#i-cup"/></svg></div>
+ <strong class="end-score" id="end-score">0</strong><div class="end-level"><img id="end-image" alt="本局最高形态"><span id="end-level">Lv.1 趴趴菲比</span></div>
+ <p class="end-summary" id="end-summary"></p><p class="end-warm" id="end-warm"></p>
+ <label class="sr-only" for="end-name">上榜昵称</label><input id="end-name" maxlength="12" placeholder="上榜昵称" autocomplete="nickname">
+ <button class="primary full" id="submit-score">提交成绩</button><p class="submit-status" id="submit-status" role="status"></p>
+ <button class="secondary full" id="again-button">再来一局</button><button class="text-link" id="end-rank">查看排行榜</button>
+</dialog>
+<dialog id="rank-dialog" class="modal rank-modal">
+ <div class="modal-top"><h2>排行榜 <span class="mode-pill" data-rank-mode>连接中</span></h2><button class="icon-button" data-close aria-label="关闭"><svg><use href="#i-close"/></svg></button></div>
+ <div class="rank-sources tabs" role="tablist" aria-label="排行榜来源"><button data-rank-source="public" role="tab">公共榜</button><button data-rank-source="local" role="tab">本机记录</button></div>
+ <div class="rank-controls"><div class="tabs" role="tablist" aria-label="榜单时段"><button class="active" data-scope="all" role="tab" aria-selected="true">总榜</button><button data-scope="today" role="tab" aria-selected="false">今日</button></div><button class="icon-button refresh-rank" aria-label="刷新"><svg><use href="#i-refresh"/></svg></button></div>
+ <div class="rank-head"><span>排名 / 昵称</span><span>分数</span></div><div class="rank-list full-rank-list" id="full-rank-list"></div>
+ <button class="secondary full pending-button" data-retry-pending hidden>重试上传</button>
+ <div class="my-rank"><span>我的名次</span><strong id="modal-my-rank">—</strong></div><p class="muted small"><span id="rank-total"></span><br><span id="rank-updated"></span></p>
+ <div class="rank-notes"><span id="rank-note">成绩仅保存在当前浏览器</span><span>今日按北京时间</span></div>
+</dialog>
+<dialog id="detail-dialog" class="modal detail-modal">
+ <div class="modal-top"><h2 id="detail-title">Lv.1 趴趴菲比</h2><button class="icon-button" data-close aria-label="关闭"><svg><use href="#i-close"/></svg></button></div>
+ <div class="detail-image"><img id="detail-image" alt="菲比原形"></div>
+</dialog>
+<dialog id="about-dialog" class="modal small-modal">
+ <div class="modal-top"><h2>关于</h2><button class="icon-button" data-close aria-label="关闭"><svg><use href="#i-close"/></svg></button></div>
+ <p>本页基于原作 <a href="https://mirac.asia/" target="_blank" rel="noopener">mirac.asia 的《合成大菲比》</a>制作:<strong>玩法、素材与界面保持原作</strong>,仅新增棋盘宽 / 高可调、页面缩放、自动释放(速度可选)与手机端适配。改版做法参考<a href="https://github.com/kaerkaifei/BigNaiWa" target="_blank" rel="noopener">合成大奶娃改版</a>。感谢原作者的慷慨分享,版权归原作者所有。</p>
+ <p>使用用户选定的 11 个菲比形态及补全素材。非官方同人作品，素材权利归原作者。</p><p class="muted small">公共榜只展示昵称和成绩，提交无需账号。本机记录不会自动变成公共榜；公共成绩需主动提交。昵称不用于身份认证；同名游客互不覆盖。更换浏览器或清除站点数据会成为新游客，但已上榜成绩仍保留。</p><p class="muted small">v12 · Vercel 公共排行榜。LV3 / LV4 使用补全版。</p>
+</dialog>
+<div id="live-status" class="sr-only" role="status" aria-live="polite"></div>
+
+
+
+
+
+
+
+
+<script defer src="app.js"></script>
+</body>
+</html>
